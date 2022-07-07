@@ -65,9 +65,11 @@
 </head>
 
 <body>
-
+  <span onclick="javascript: clearBrush();">[reset]</span>
+  <button>Click</button>
   <svg class="chart" id="chart"></svg>
-
+  <table id="table">
+  </table>
   <script>
     var data = [{
       key: 1,
@@ -106,10 +108,13 @@
 
     var margin = {
       top: 10,
-      right: 41,
+      right: 40,
       bottom: 42,
       left: 10
     };
+
+    var selectedObject = [];
+    var selection = "";
 
     var width = 400 - margin.left - margin.right,
       height = 250 - margin.top - margin.bottom;
@@ -152,10 +157,21 @@
       .x(x)
       .on("brush", brushed)
       .on("brushend", brushend)
-      .on('brushend', function(d){  
-          k = brush.extent();
-          console.log(k);
+      .on('brushend', function(d){
+        k = brush.extent();
+        j = data.filter(function(d){
+          return k[0] <= d.value && k[1] >=d.value;
+        });
+	      console.log(j)  
+        var obj = { Title: data, ID: j,  Value: j};
+        selectedObject.push(obj);
+        for(i=0;i<j.length;i++){
+          selection += "<tr style= color:" + ">    <td>" + j[i].key + "</td>    <td>" + j[i].value;
+        }
+        document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected: "+j.length+" </td></tr>" + "<tr><th>ID</th><th>Name</th></tr>" + selection;
+        
       });
+      
 
     function brushend() {
       if (brush.empty()){
@@ -170,6 +186,14 @@
       chart.select("#clip>rect")
         .attr("x", x(e[0]))
         .attr("width", x(e[1]) - x(e[0]));
+    }
+
+    function clearBrush(){
+      var selection = "";
+      var selectedObject = [];
+      j=[];
+      d3.selectAll(".brush").call(brush.clear());
+      document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected:  </td></tr>" + "<tr><th>ID</th><th>Name</th></tr>";
     }
 
     chart.selectAll(".hidden")
@@ -223,7 +247,7 @@
     chart.append("text") //Add chart title
       .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom) + ")")
       .style("text-anchor", "middle")
-      .text("Petal Length");
+      .text("");
 
     chart.append("g")
       .attr("class", "y axis")
