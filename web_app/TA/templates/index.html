@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+ 
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}">
+  <script data-require="d3@3.5.3" data-semver="3.5.3" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+  
+</head>
+
+<body>
+ 
+  <div style="float:left">
+    
+    <svg class="chart" id="chart" ></svg>
+    <div>
+      <button onclick="javascript: clearBrush();" class="button">Reset</button>
+    </div>
+    <table id="table"></table>
+    <script>
+      var d = '{{ data }}'
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='histogram.js')}}"></script>
+    
+  </div>
+  <div style="float:float" class="tree" id="tree">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='tree.js')}}"></script>
+</body>
+
+</html>

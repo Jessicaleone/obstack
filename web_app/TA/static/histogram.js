@@ -1,76 +1,16 @@
-<!DOCTYPE html>
-<html>
+    
+    /*
+    function decodeHtml(html) {
+      var txt = document.createElement("textarea");
+      txt.innerHTML = html;
+    return txt.value;
+    }
 
-<head>
-  <script data-require="d3@3.5.3" data-semver="3.5.3" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
-  <style>
-    .charts {
-      padding: 10px 0;
-    }
-    
-    .chart {
-      padding-left: 20px;
-      padding-top: 10px;
-    }
-    
-    .axis text {
-      font: 10px sans-serif;
-      fill: black;
-    }
-    
-    .chart text {
-      font: 10px sans-serif;
-      fill: black;
-    }
-    
-    .axis path,
-    .axis line {
-      fill: none;
-      stroke: #000;
-      shape-rendering: crispEdges;
-    }
-    /*dont display yAxis for categorical variable*/
-    
-    #chart .y.axis g {
-      display: none;
-    }
-    /*Labels in categorical chart */
-    
-    text#catTitle.catTitle {
-      font: 10px sans-serif;
-      fill: white;
-    }
-    /*Color for the brush */
-    
-    .brush rect.extent {
-      fill: steelblue;
-      fill-opacity: .125;
-    }
-    /*Color for the brush resize path*/
-    
-    .brush .resize path {
-      fill: #eee;
-      stroke: #666;
-    }
-    /*Color for the hidden object*/
-    
-    .hidden {
-      fill: grey;
-    }
-    
-    .bar {
-      fill: steelblue;
-    }
-  </style>
-</head>
-
-<body>
-  <span onclick="javascript: clearBrush();">[reset]</span>
-  <button>Click</button>
-  <svg class="chart" id="chart"></svg>
-  <table id="table">
-  </table>
-  <script>
+    var x = decodeHtml(d)
+    console.log(typeof x)
+    var data = JSON.parse(x)
+    console.log(data)
+    */
     var data = [{
       key: 1,
       value: 37
@@ -105,7 +45,8 @@
       key: 6.5,
       value: 4
     }];
-
+    console.log(typeof data)
+    
     var margin = {
       top: 10,
       right: 40,
@@ -116,8 +57,8 @@
     var selectedObject = [];
     var selection = "";
 
-    var width = 400 - margin.left - margin.right,
-      height = 250 - margin.top - margin.bottom;
+    var width = 500 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
     var y = d3.scale.linear()
       .domain([0, d3.max(data, function(d) {
@@ -268,7 +209,3 @@
     }
 
     chart.selectAll(".resize").append("path").attr("d", resizePath);
-  </script>
-</body>
-
-</html>

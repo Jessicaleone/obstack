@@ -1,0 +1,85 @@
+.button {
+    background-color: #e7e7e7; 
+    color: black;
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 20%;
+  }
+.charts {
+    padding: 10px 0;
+}
+
+.chart {
+    padding-left: 20px;
+    padding-top: 10px;
+}
+
+.axis text {
+    font: 10px sans-serif;
+    fill: black;
+}
+
+.chart text {
+    font: 10px sans-serif;
+    fill: black;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+/*dont display yAxis for categorical variable*/
+
+#chart .y.axis g {
+    display: none;
+}
+/*Labels in categorical chart */
+
+text#catTitle.catTitle {
+    font: 10px sans-serif;
+    fill: white;
+}
+/*Color for the brush */
+
+.brush rect.extent {
+    fill: steelblue;
+    fill-opacity: .125;
+}
+/*Color for the brush resize path*/
+
+.brush .resize path {
+    fill: #eee;
+    stroke: #666;
+}
+/*Color for the hidden object*/
+
+.hidden {
+    fill: grey;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.node rect {
+    stroke-width: 3px;
+}
+
+.node text {
+    font: 12px sans-serif;
+    fill: #fff;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+}
