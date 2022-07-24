@@ -36,6 +36,10 @@
     stroke: #000;
     shape-rendering: crispEdges;
 }
+
+.c3-axis-x > .tick{
+    fill:none;                 
+    }
 /*dont display yAxis for categorical variable*/
 
 #chart .y.axis g {

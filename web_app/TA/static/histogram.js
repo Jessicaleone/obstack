@@ -1,90 +1,59 @@
-    
-    /*
-    function decodeHtml(html) {
-      var txt = document.createElement("textarea");
-      txt.innerHTML = html;
-    return txt.value;
+  async function fetchData(){
+    try{
+      const response = await fetch("http://127.0.0.1:5000/get_data");
+      if(!response.ok){
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data)
+      return data
     }
+    catch(error){
+      console.error(`Could not get products: ${error}`)
+    }
+   }
 
-    var x = decodeHtml(d)
-    console.log(typeof x)
-    var data = JSON.parse(x)
-    console.log(data)
-    */
-    var data = [{
-      key: 1,
-      value: 37
-    }, {
-      key: 1.5,
-      value: 13
-    }, {
-      key: 2.5,
-      value: 1
-    }, {
-      key: 3,
-      value: 4
-    }, {
-      key: 3.5,
-      value: 14
-    }, {
-      key: 4,
-      value: 18
-    }, {
-      key: 4.5,
-      value: 21
-    }, {
-      key: 5,
-      value: 17
-    }, {
-      key: 5.5,
-      value: 16
-    }, {
-      key: 6,
-      value: 5
-    }, {
-      key: 6.5,
-      value: 4
-    }];
-    console.log(typeof data)
-    
-    var margin = {
-      top: 10,
-      right: 40,
-      bottom: 42,
-      left: 10
-    };
+  var margin = {
+      top: 20,
+      right: 20,
+      bottom: 30,
+      left: 40
+    };    
 
     var selectedObject = [];
     var selection = "";
 
-    var width = 500 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+    var width = 800 - margin.left - margin.right,
+      height = 600 - margin.top - margin.bottom;
 
-    var y = d3.scale.linear()
-      .domain([0, d3.max(data, function(d) {
-        return d.value
-      })])
-      .range([height, 0]);
+    var x = d3.scaleBand()
+      .range([0, width])
+      .padding(0.1);
+    
+    var y = d3.scaleLinear()
+      .range([height, 0]);  
 
-    var x = d3.scale.linear()
-      .domain([0, d3.max(data, function(d) {
-        return d.key;
-      }) + 1])
-      .rangeRound([0, width]);
+    var brush = d3.brushX()
+    
+    
+    var chart = d3.select(".barchart").append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", 
+                "translate(" + margin.left + "," + margin.top + ")") ;
+    // get the data
+    d3.json("get_data", function(error, data) {
+    if (error) throw error;
+  
+    // Scale the range of the data in the domains
+    x.domain(data.map(function(d) { return d.key; }));
+    y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
-    var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left");
-
-    var chart = d3.select(".chart#chart")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .style("margin-left", 15 + "px");
-
+    // format the data
+    data.forEach(function(d) {
+      d.value = +d.value;
+    });
     chart.append("defs")
       .append("clipPath")
       .attr("id", "clip")
@@ -94,96 +63,46 @@
       .attr("width", width)
       .attr("height", height);
 
-    var brush = d3.svg.brush()
-      .x(x)
+   brush.extent([[0, 0], [width, height]])
       .on("brush", brushed)
-      .on("brushend", brushend)
-      .on('brushend', function(d){
-        k = brush.extent();
+      .on("end",brushend)
+      .on('end', function(d){
+        var selection = d3.event.selection;
         j = data.filter(function(d){
-          return k[0] <= d.value && k[1] >=d.value;
-        });
-	      console.log(j)  
+          return selection[0] <= d.value && selection[1] >=d.value;
+        }); 
         var obj = { Title: data, ID: j,  Value: j};
         selectedObject.push(obj);
         for(i=0;i<j.length;i++){
+          console.log(j[i].value)
           selection += "<tr style= color:" + ">    <td>" + j[i].key + "</td>    <td>" + j[i].value;
         }
-        document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected: "+j.length+" </td></tr>" + "<tr><th>ID</th><th>Name</th></tr>" + selection;
+        document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected: "+j.length+" </td></tr>" + "<tr><th>Trace ID</th><th>Span ID</th><th>Duration</th></tr>" + selection;
         
       });
       
-
-    function brushend() {
-      if (brush.empty()){
-        chart.select("#clip>rect")
-          .attr("x", 0)
-          .attr("width", width);
-      }
-    }
-
-    function brushed() {
-      var e = brush.extent();
-      chart.select("#clip>rect")
-        .attr("x", x(e[0]))
-        .attr("width", x(e[1]) - x(e[0]));
-    }
-
-    function clearBrush(){
-      var selection = "";
-      var selectedObject = [];
-      j=[];
-      d3.selectAll(".brush").call(brush.clear());
-      document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected:  </td></tr>" + "<tr><th>ID</th><th>Name</th></tr>";
-    }
-
-    chart.selectAll(".hidden")
+    chart.selectAll(".barchart")
       .data(data)
       .enter().append("rect")
-      .attr("class", "hidden")
-      .attr("x", function(d) {
-        return x(d.key);
-      })
-      .attr("y", function(d) {
-        return y(d.value);
-      })
-      .attr("height", function(d) {
-        return height - y(d.value);
-      })
-      .attr("width", x(0.5))
-      .style("stroke", "white")
-      .append("title")
-      .text(function(d) {
-        return d.key;
-      });
-
-    
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.key); })
+      .attr("width", x.bandwidth())
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); });
 
     chart.selectAll(".bar")
       .data(data)
       .enter().append("rect")
-      .attr("clip-path", "url(#clip)")
       .attr("class", "bar")
-      .attr("x", function(d) {
-        return x(d.key);
-      })
-      .attr("y", function(d) {
-        return y(d.value);
-      })
-      .attr("height", function(d) {
-        return height - y(d.value);
-      })
-      .attr("width", x(0.5))
-      .style("stroke", "white")
-      .append("title")
-      .text(function(d) {
-        return d.key;
-      });
+      .attr("x", function(d) { return x(d.key); })
+      .attr("width", x.bandwidth())
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); });
 
     chart.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+      .call(d3.axisBottom(x));
 
     chart.append("text") //Add chart title
       .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom) + ")")
@@ -192,7 +111,7 @@
 
     chart.append("g")
       .attr("class", "y axis")
-      .call(yAxis);
+      .call(d3.axisLeft(y));
 
     chart.append("g")
       .attr("class", "x brush")
@@ -200,6 +119,8 @@
       .selectAll("rect") //select all the just-created rectangles
       .attr("y", -6)
       .attr("height", (height + margin.top)) //set their height
+    
+    
 
     function resizePath(d) {
       var e = +(d == "e"),
@@ -209,3 +130,34 @@
     }
 
     chart.selectAll(".resize").append("path").attr("d", resizePath);
+});
+
+function brushend() {
+  if (brush.empty()){
+    chart.select("#clip>rect")
+      .attr("x", 0)
+      .attr("width", width);
+  }
+}
+
+function brushed() {
+  var e = d3.event.selection;
+  chart.select("#clip>rect")
+    .attr("x", e[0])
+    .attr("width", e[1] - e[0]);
+}
+
+function clearBrush(){
+  var selection = "";
+  var selectedObject = [];
+  j=[];
+  brush
+    .clear()
+    .event(d3.select(".brush"));
+  document.getElementById("table").innerHTML = "<tr><td colspan = " + "4" + ">Data Selected:  </td></tr>" + "<tr><th>ID</th><th>Name</th></tr>"+selection;
+}
+
+    
+
+
+ 

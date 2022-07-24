@@ -5,14 +5,12 @@ app = Flask(__name__)
 
 es = Elasticsearch('http://localhost:9200',timeout=5000)
 
-@app.route("/greet", methods=["POST","GET"])
-def greet():
-    request.form['name_input']
-
-@app.route('/', methods=['GET'])
+@app.route("/", methods=["POST","GET"])
 def index():
-    # results = es.get(index='jaeger-span-2022-05-19', id ='pQpB3YAByCFtAE3ebSYQ')
-    # return jsonify(results['_source'])
+   return render_template("index.html")
+
+@app.route('/get_data', methods=["GET","POST"])
+def get_data():
     
     page = es.search(index='jaeger-span-2022-05-19', scroll='10m', size=10000, body={
         "query":{
@@ -23,7 +21,7 @@ def index():
                 {
                 "script": {
                 "script": {
-                    "inline": "doc['traceID.keyword'].value == doc['spanID.keyword'].value"
+                    "source": "doc['traceID.keyword'].value == doc['spanID.keyword'].value"
 
                         }
                         } 
@@ -50,21 +48,27 @@ def index():
     for i in query_request:
         for j in i:
             result.append(j['_source'])
-    import numpy as np 
     
+    
+    return json.dumps(result)
+
+
+@app.route('/get_bins', methods=["GET","POST"])
+def get_bins():
+    import requests
+    req = requests.get('http://127.0.0.1:5000/get_data')
+    import numpy as np
+
     duration =[]
-    for i in result:
-        duration.append(i['duration'])
+    for i in req.text:
+       duration.append(i['duration'])
     # Creating histogram
-    np.histogram(duration, bins = 10)
+    np.histogram(duration, bins = 1000)
             
-    hist, bins = np.histogram(duration, bins = 10) 
+    hist, bins = np.histogram(duration, bins = 300) 
             
     # Displaying histogram
 
     l = [{'key': float(bins[i]), 'value': float(hist[i])} for i in range(len(hist))]
     
-    print(l)
-    y= json.dumps(l)
-    print(type(y))
-    return render_template("index.html", data=y)
+    return json.dumps(l)
